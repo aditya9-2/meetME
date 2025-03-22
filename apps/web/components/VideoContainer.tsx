@@ -75,36 +75,39 @@ export const VideoContainer = ({
                             </div>
                         </div>
                     </Card>
-                )}
+                )
+                }
                 {/* Remote Videos */}
-                {remoteUsers.map((user) => (
-                    <Card
-                        key={user.id}
-                        className="overflow-hidden rounded-xl border border-border bg-gradient-to-br from-muted/50 to-muted shadow-sm"
-                    >
-                        <div className="relative aspect-video bg-black">
-                            {user.stream ? (
-                                <video
-                                    className="h-full w-full object-cover"
-                                    autoPlay
-                                    playsInline
-                                    ref={(el) => {
-                                        if (el) el.srcObject = user.stream; // Attach the remote stream to the video element
-                                    }}
-                                />
-                            ) : (
-                                // Show a placeholder if the stream isn’t available yet
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <p className="text-muted-foreground">Waiting for {user.name}...</p>
+                {
+                    remoteUsers.map((user) => (
+                        <Card
+                            key={user.id}
+                            className="overflow-hidden z-40 bg-green-600 rounded-xl border border-border bg-gradient-to-br from-muted/50 to-muted shadow-sm"
+                        >
+                            <div className="relative aspect-video right-8  bg-black">
+                                {user.stream ? (
+                                    <video
+                                        className="h-full w-full object-cover"
+                                        autoPlay
+                                        playsInline
+                                        ref={(el) => {
+                                            if (el) el.srcObject = user.stream; // Attach the remote stream to the video element
+                                        }}
+                                    />
+                                ) : (
+                                    // Show a placeholder if the stream isn’t available yet
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <p className="text-muted-foreground">Waiting for {user.name}...</p>
+                                    </div>
+                                )}
+                                <div className="absolute bottom-3 left-3 bg-background/80 px-2 py-1 rounded-md text-xs font-medium">
+                                    {user.name}
                                 </div>
-                            )}
-                            <div className="absolute bottom-3 left-3 bg-background/80 px-2 py-1 rounded-md text-xs font-medium">
-                                {user.name}
                             </div>
-                        </div>
-                    </Card>
-                ))}
-            </div>
-        </div>
+                        </Card>
+                    ))
+                }
+            </div >
+        </div >
     );
 };
