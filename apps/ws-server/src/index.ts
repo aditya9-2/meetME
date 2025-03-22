@@ -160,6 +160,15 @@ wss.on('connection', function connection(ws) {
 
             }
 
+            if (parsedData.type === "OFFER" || parsedData.type === "ANSWER" || parsedData.type === "ICE_CANDIDATE") {
+                const { roomId, receiverId } = parsedData.payload;
+                const receiver = users.find(u => u.userId === receiverId && u.rooms.includes(roomId));
+
+                if (receiver) {
+                    receiver.ws.send(JSON.stringify(parsedData));
+                }
+            }
+
 
         } catch (error) {
 
@@ -172,6 +181,26 @@ wss.on('connection', function connection(ws) {
             }));
 
         }
+    });
+
+    ws.on("close", () => {
+        users.forEach((user, index) => {
+            if (user.ws === ws) {
+                user.rooms.forEach((roomId) => {
+                    users.forEach((u) => {
+                        if (u.rooms.includes(roomId) && u.ws !== ws) {
+                            u.ws.send(
+                                JSON.stringify({
+                                    type: "USER_LEFT",
+                                    payload: { roomId, userId: user.userId },
+                                })
+                            );
+                        }
+                    });
+                });
+                users.splice(index, 1); // Remove the user
+            }
+        });
     });
 
     ws.send(JSON.stringify({ type: "CONNECTED", message: "WebSocket connected" }));
