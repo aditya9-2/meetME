@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 
-export const useMideaStream = () => {
+export const useMediaStream = () => {
     const [state, setState] = useState<MediaStream | null>(null);
     const isStreamSet = useRef(false);
 
