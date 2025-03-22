@@ -298,7 +298,7 @@ const MeetingRoom = ({ params }: {
                     toggleMic={toggleMic}
                     toggleVideo={toggleVideo}
                     isMicOn={isMicOn}
-                    isVideOn={isVideoOn}
+                    isVideoOn={isVideoOn}
                 />
             </div>
 
