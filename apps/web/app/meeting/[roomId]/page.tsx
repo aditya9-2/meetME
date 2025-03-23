@@ -35,7 +35,7 @@ const MeetingRoom = ({ params }: {
     const [ws, setWs] = useState<WebSocket | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [remoteUsers, setRemoteUsers] = useState<RemoteUser[]>([]);
-    const [isMicOn, SetIsMicOn] = useState(true);
+    const [isMicOn, setIsMicOn] = useState(true);
     const [isVideoOn, setIsVideoOn] = useState(true);
 
     const userId = useRef<string>(`user-${Math.random().toString(36).substring(7)}`);
@@ -271,17 +271,17 @@ const MeetingRoom = ({ params }: {
 
     const toggleMic = () => {
         if (localStream) {
-            const audiTrack = localStream.getAudioTracks()[0];
-            if (audiTrack) {
-                audiTrack.enabled = !audiTrack.enabled;
-                SetIsMicOn(audiTrack.enabled);
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                setIsMicOn(audioTrack.enabled);
             }
         }
     }
 
     const toggleVideo = () => {
         if (localStream) {
-            const videoTrack = localStream.getAudioTracks()[0];
+            const videoTrack = localStream.getVideoTracks()[0];
             if (videoTrack) {
                 videoTrack.enabled = !videoTrack.enabled;
                 setIsVideoOn(videoTrack.enabled);
