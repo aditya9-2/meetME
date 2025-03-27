@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Video, VideoOff, PhoneOff } from "lucide-react";
@@ -30,6 +30,10 @@ export const VideoContainer = ({
     isVideoOn
 
 }: VideoContainerProps) => {
+
+    useEffect(() => {
+        console.log("Remote users:", remoteUsers);
+    }, [remoteUsers]);
 
 
     return (

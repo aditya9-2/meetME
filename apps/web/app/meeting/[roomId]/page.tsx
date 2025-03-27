@@ -53,6 +53,7 @@ const MeetingRoom = ({ params }: {
 
             // When the socket connection opens, send a JOIN_MEETING message
             socket.onopen = () => {
+                console.log("Joining room:", roomId, "with userId:", userId.current);
                 socket.send(
                     JSON.stringify({
                         type: "JOIN_MEETING",
@@ -75,10 +76,12 @@ const MeetingRoom = ({ params }: {
                     return;
 
                 } else if (data.type === "OFFER") {
+                    console.log("Received OFFER from:", data.payload.senderId);
 
                     handleAnswer(data.payload);
 
                 } else if (data.type === "ANSWER") {
+                    console.log("Received ANSWER from:", data.payload.senderId);
 
                     handleOffer(data.payload)
 
@@ -144,6 +147,7 @@ const MeetingRoom = ({ params }: {
 
         pc.onicecandidate = (e) => {
             if (e.candidate) {
+                console.log("Sending ICE candidate to:", remoteUserId);
                 ws?.send(JSON.stringify({
                     type: "ICE_CANDIDATE",
                     payload: {
@@ -157,19 +161,21 @@ const MeetingRoom = ({ params }: {
         }
 
         pc.ontrack = (e) => {
+            console.log("Received track from:", remoteUserId, "kind:", e.track.kind);
             setRemoteUsers((prev) => {
                 const user = prev.find(u => u.id === remoteUserId);
                 const stream = user?.stream || new MediaStream();
                 stream.addTrack(e.track);
 
                 if (!user) {
+                    console.log("Adding new remote user:", remoteUserId);
                     return [...prev, {
                         id: remoteUserId,
                         name: remoteUsername,
                         stream
                     }];
                 }
-
+                console.log("Updating stream for:", remoteUserId);
                 return prev.map(u => u.id === remoteUserId ? { ...u, stream } : u)
             });
         }
@@ -179,6 +185,7 @@ const MeetingRoom = ({ params }: {
     }
 
     const initiatePeerConnection = (remoteUserId: string, remoteUsername: string) => {
+        console.log("Initiating peer connection with:", remoteUserId);
         const pc = createPeerConnection(remoteUserId, remoteUsername);
 
         localStream?.getTracks().forEach((track) => pc.addTrack(track, localStream));
@@ -186,6 +193,7 @@ const MeetingRoom = ({ params }: {
         pc.createOffer()
             .then((offer) => {
                 pc.setLocalDescription(offer); // Set our offer as the local description
+                console.log("Offer created and sent to:", remoteUserId);
                 ws?.send(
                     JSON.stringify({
                         type: "OFFER",
@@ -198,9 +206,11 @@ const MeetingRoom = ({ params }: {
 
     // Handle an offer from another user
     const handleOffer = (payload: { senderId: string; receiverId: string; sdp: string }) => {
+        console.log("Handling offer from:", payload.senderId);
         const { senderId, sdp } = payload;
         let pc = peerConnections.current.get(senderId);
         if (!pc) {
+            console.log("Creating new peer connection for:", senderId);
             // If no connection exists, create one
             pc = createPeerConnection(senderId, `User-${senderId}`);
             localStream?.getTracks().forEach((track) => pc?.addTrack(track, localStream));
@@ -210,6 +220,7 @@ const MeetingRoom = ({ params }: {
             .then(() => pc.createAnswer())
             .then((answer) => {
                 pc.setLocalDescription(answer); // Set our answer as the local description
+                console.log("Answer created and sent to:", senderId);
                 ws?.send(
                     JSON.stringify({
                         type: "ANSWER",
@@ -222,6 +233,7 @@ const MeetingRoom = ({ params }: {
 
     // Handle an answer from another user
     const handleAnswer = (payload: { senderId: string; sdp: string }) => {
+        console.log("Handling answer from:", payload.senderId);
         const { senderId, sdp } = payload;
         const pc = peerConnections.current.get(senderId);
         if (pc) {
@@ -229,18 +241,23 @@ const MeetingRoom = ({ params }: {
             pc.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp })).catch((err) =>
                 console.error("Error setting remote description:", err)
             );
+        } else {
+            console.warn("No peer connection found for:", senderId);
         }
     };
 
     // Handle an ICE candidate from another user
     const handleIceCandidate = (payload: { senderId: string; candidate: any }) => {
+        console.log("Received ICE candidate from:", payload.senderId);
         const { senderId, candidate } = payload;
         const pc = peerConnections.current.get(senderId);
         if (pc) {
             // Add the ICE candidate to help establish the connection
-            pc.addIceCandidate(new RTCIceCandidate(candidate)).catch((err) =>
-                console.error("Error adding ICE candidate:", err)
-            );
+            pc.addIceCandidate(new RTCIceCandidate(candidate))
+                .then(() => console.log("Added ICE candidate from:", senderId))
+                .catch((err) =>
+                    console.error("Error adding ICE candidate:", err)
+                );
         }
     };
 

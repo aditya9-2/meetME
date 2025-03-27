@@ -161,6 +161,7 @@ wss.on('connection', function connection(ws) {
             }
 
             if (parsedData.type === "OFFER" || parsedData.type === "ANSWER" || parsedData.type === "ICE_CANDIDATE") {
+                console.log(`Relaying ${parsedData.type} to ${parsedData.payload.receiverId}`);
                 const { roomId, receiverId } = parsedData.payload;
                 const receiver = users.find(u => u.userId === receiverId && u.rooms.includes(roomId));
 
