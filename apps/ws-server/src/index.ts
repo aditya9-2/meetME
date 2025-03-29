@@ -170,6 +170,14 @@ wss.on('connection', function connection(ws) {
                 }
             }
 
+            if (parsedData.type === "DISCONNECT") {
+                const { userId } = parsedData.payload;
+                const index = users.findIndex(u => u.userId === userId);
+                if (index !== -1) {
+                    users.splice(index, 1);
+                }
+            }
+
 
         } catch (error) {
 
