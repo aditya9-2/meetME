@@ -1,4 +1,4 @@
-const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const characters = "abcdefghijklmnopqrstuvwxyz";
 
 export const generateMeetingId = () => {
 
